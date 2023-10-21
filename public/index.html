@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/public/styles.css">
+  <link rel="icon" href="/public/favicon.ico" type="image/x-icon" />
+  <script src="/utils/constants.js"></script>
+  <title>ChatRoom</title>
+</head>
+<body>
+  <h2>📱ChatRoom</h2>
+  <div class="chat">
+  </div>
+  <form id="messageForm">
+    <input type="text" id="messageBox" placeholder="Type your message here" />
+    <button id="send" title="Send">➤</button>
+  </form>
+  
+  <script> 
+   
+    let wsClient; 
+    const username= prompt("Enter your name");
+   
+    
+    const messageBox = document.querySelector('#messageBox');
+    const messageForm = document.querySelector('#messageForm');
+      
+    messageForm.onsubmit = function(e) {
+      e.preventDefault();
+      
+    
+      const message = messageBox.value;
+      showMessageSent(message);
+      messageBox.value = '';
+      
+      sendMessageToServer(message);
+    }
+
+
+    function init() {
+
+      if (wsClient) {
+        wsClient.onerror = wsClient.onopen = wsClient.onclose = null;
+        wsClient.close();
+      }
+
+
+       const URL = 'ws://localhost:' + PORT;
+        wsClient = new WebSocket(URL);
+
+      
+        wsClient.onopen = () => {
+          const data = {
+            type: CLIENT.MESSAGE.NEW_USER ,
+            payload: {
+              username
+            }
+          }
+          wsClient.send(JSON.stringify(data));
+        }
+
+      wsClient.onmessage = (messageEvent) => {
+        const message = messageEvent.data;
+          const {type, payload} = JSON.parse(message);
+          switch (type) {
+            case CLIENT.MESSAGE.NEW_MESSAGE :
+              showMessageReceived(`<p><b>[${payload.username}]:</b> ${payload.message}</p>`);
+              break;
+            case SERVER.BROADCAST.NEW_USER_WITH_TIME:
+              showMessageReceived(`<em> <b>${payload.username}</b> has joined the chat at ${payload.time} !</em>`);
+              break;
+            default:
+              showMessageReceived('Unknown message type: ' + type);
+          }
+
+          
+      }
+    
+      wsClient.onclose = (event) => {
+        showMessageReceived('No WebSocket connection :(');
+        wsClient = null;
+      }
+
+      wsClient.onerror = (event) => {
+        console.error("WebSocket error observed:", event);
+        wsClient = null;
+      }
+    }
+
+    function sendMessageToServer(message) {
+      if (!wsClient) {
+        showMessageReceived('No WebSocket connection :(');
+        return;
+      }
+
+      const data = {
+        type: CLIENT.MESSAGE.NEW_MESSAGE,
+        payload: {message, username }
+      }
+     wsClient.send(JSON.stringify(data));
+    
+     
+    }
+
+    const messages = document.querySelector('.chat');
+    
+    function showMessageSent(message) { 
+      showNewMessage(message, 'sending'); 
+    }
+    function showMessageReceived(message) {
+      showNewMessage(message, 'receiving'); 
+    }
+    
+   function showNewMessage(message, className) {
+      const textNode = document.createElement('div');
+      textNode.innerHTML = message;
+      textNode.className = 'message';
+      
+      const messageNode = document.createElement('div');
+      messageNode.className = 'messages ' + className;
+      messageNode.appendChild(textNode);
+      
+      messages.appendChild(messageNode);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    init();
+
+  </script>
+</body>
+</html>
