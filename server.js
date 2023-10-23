@@ -4,7 +4,8 @@ const CONSTANTS = require('./utils/constants.js');
 const fs = require('fs');
 const path = require('path');
 const WebSocket = require('ws');
-const { log } = require('console');
+
+
 
 const { PORT, CLIENT,SERVER } = CONSTANTS;
 

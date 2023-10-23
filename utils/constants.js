@@ -1,4 +1,4 @@
-const PORT = 8080;
+const PORT = 3000;
 const CLIENT = {
   MESSAGE: {
     NEW_USER: 'NEW_USER',

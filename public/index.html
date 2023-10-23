@@ -15,9 +15,9 @@
   </div>
   <form id="messageForm">
     <input type="text" id="messageBox" placeholder="Type your message here" />
-    <button id="send" title="Send">➤</button>
+    <button id="send" title="Send">Send</button>
   </form>
-  
+  <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
   <script> 
    
     let wsClient; 
@@ -47,7 +47,7 @@
       }
 
 
-       const URL = 'ws://localhost:' + PORT;
+       const URL = 'https://chat-room-1ggh.onrender.com';
         wsClient = new WebSocket(URL);
 
       
